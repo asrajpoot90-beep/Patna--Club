@@ -2,332 +2,1023 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>👑 PATNA CLUB 👑</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>👑 PATNA CLUB - 50 Games</title>
 
 <style>
-*{box-sizing:border-box}
+*{
+  box-sizing:border-box;
+}
+
 body{
   margin:0;
   background:#111;
-  color:#fff;
+  color:white;
   font-family:Arial,sans-serif;
   text-align:center;
 }
+
 header{
-  background:#171717;
+  background:#181818;
   padding:22px 10px;
-}
-h1{color:#ffd400;margin:0 0 8px}
-.top{
-  background:#222;
-  padding:18px 10px;
   border-bottom:2px solid #333;
 }
+
+h1{
+  color:#ffd400;
+  margin:0 0 8px;
+}
+
+.subtitle{
+  color:#ddd;
+}
+
 .coins{
+  background:#222;
+  padding:18px;
   font-size:22px;
   font-weight:bold;
   color:#ffd400;
 }
+
+.container{
+  max-width:650px;
+  margin:auto;
+  padding:15px;
+}
+
+.game-list{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.game-row{
+  background:#222;
+  border:1px solid #444;
+  border-radius:10px;
+  padding:14px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  text-align:left;
+}
+
+.game-name{
+  font-weight:bold;
+}
+
+.game-number{
+  color:#ffd400;
+  margin-right:5px;
+}
+
 button{
   background:#ffd400;
   color:#111;
   border:0;
-  padding:12px 20px;
+  padding:10px 16px;
   border-radius:8px;
   font-weight:bold;
-  margin:7px;
   cursor:pointer;
 }
-button:hover{opacity:.85}
-.card{
-  background:#222;
-  margin:15px auto;
-  padding:20px;
-  max-width:600px;
-  border-radius:12px;
+
+button:hover{
+  opacity:.85;
 }
-.game{
+
+#gameScreen{
   display:none;
+  background:#222;
+  border-radius:12px;
+  padding:22px;
+  margin-top:15px;
 }
-input{
-  padding:12px;
-  border-radius:7px;
-  border:1px solid #777;
-  width:80%;
-  max-width:300px;
-  text-align:center;
-  font-size:17px;
-}
+
 #question{
-  font-size:22px;
-  margin:20px;
+  font-size:21px;
   line-height:1.5;
+  margin:20px 0;
 }
-.options button{
-  min-width:110px;
+
+input{
+  width:90%;
+  max-width:350px;
+  padding:12px;
+  border-radius:8px;
+  border:1px solid #777;
+  font-size:18px;
+  text-align:center;
 }
-.small{color:#aaa}
-.success{color:#57e389}
+
+.result{
+  min-height:28px;
+  margin:15px;
+  font-weight:bold;
+}
+
+.back{
+  background:#555;
+  color:white;
+  margin-top:10px;
+}
+
+footer{
+  padding:30px 10px;
+  color:#888;
+}
 </style>
 </head>
 
 <body>
 
 <header>
-<h1>👑 PATNA CLUB 👑</h1>
-<p>🎮 Play • 🧠 Think • 🏆 Win</p>
+  <h1>👑 PATNA CLUB 👑</h1>
+  <div class="subtitle">🧠 Play • Think • Win</div>
 </header>
 
-<div class="top">
-  <div class="coins">🪙 Virtual Coins: <span id="coins">1000</span></div>
-  <button onclick="dailyBonus()">🎁 Daily Bonus</button>
-  <button onclick="demoAd()">📺 Watch Ad (Demo)</button>
+<div class="coins">
+  🪙 Virtual Coins: <span id="coins">1000</span>
 </div>
 
-<div class="card" id="home">
-<h2>🎮 50 Hard Skill Games</h2>
-<p>Har game me virtual coins milenge.</p>
-<button onclick="startGame()">▶️ Start Game</button>
-<p class="small">No real money • No betting • Virtual coins only</p>
+<div class="container">
+
+  <div id="gameList" class="game-list"></div>
+
+  <div id="gameScreen">
+    <h2 id="gameTitle"></h2>
+    <div id="question"></div>
+
+    <input id="answer" type="text" placeholder="Your answer">
+
+    <br><br>
+
+    <button onclick="checkAnswer()">✅ Submit</button>
+    <button onclick="newQuestion()">🔄 New Question</button>
+
+    <div id="result" class="result"></div>
+
+    <button class="back" onclick="showList()">⬅️ Back to Games</button>
+  </div>
+
 </div>
 
-<div class="card game" id="game">
-<h2 id="gameTitle"></h2>
-<div id="question"></div>
-<div id="answerArea"></div>
-<p>Game <span id="gameNo">1</span> / 50</p>
-<p>Reward: 🪙 <span id="reward">20</span></p>
-<button onclick="backHome()">🏠 Home</button>
-</div>
-
-<div class="card">
-<h2>🏆 Your Progress</h2>
-<p>Games Completed: <b id="completed">0</b> / 50</p>
-<p>Best Score: 🪙 <b id="best">0</b></p>
-</div>
+<footer>
+  PATNA CLUB © 2026<br>
+  Virtual coins only • No real money
+</footer>
 
 <script>
-let coins = Number(localStorage.getItem("coins")) || 1000;
-let completed = Number(localStorage.getItem("completed")) || 0;
-let best = Number(localStorage.getItem("best")) || 0;
-let gameIndex = 0;
+
+/* =========================
+   COINS
+========================= */
+
+let coins = Number(localStorage.getItem("patnaCoins"));
+
+if(isNaN(coins)){
+  coins = 1000;
+}
+
+document.getElementById("coins").textContent = coins;
+
+
+/* =========================
+   50 GAMES
+========================= */
+
+const games = [
+
+{
+name:"Number Sequence",
+type:"sequence"
+},
+
+{
+name:"Hard Math",
+type:"math"
+},
+
+{
+name:"Pattern Challenge",
+type:"pattern"
+},
+
+{
+name:"Logic Puzzle",
+type:"logic"
+},
+
+{
+name:"Missing Number",
+type:"missing"
+},
+
+{
+name:"Multiplication Challenge",
+type:"multiply"
+},
+
+{
+name:"Division Challenge",
+type:"division"
+},
+
+{
+name:"Square Challenge",
+type:"square"
+},
+
+{
+name:"Odd One Out",
+type:"odd"
+},
+
+{
+name:"Letter Puzzle",
+type:"letter"
+},
+
+{
+name:"Reverse Number",
+type:"reverse"
+},
+
+{
+name:"Quick Addition",
+type:"addition"
+},
+
+{
+name:"Quick Subtraction",
+type:"subtraction"
+},
+
+{
+name:"Percentage Challenge",
+type:"percentage"
+},
+
+{
+name:"Average Challenge",
+type:"average"
+},
+
+{
+name:"Ratio Challenge",
+type:"ratio"
+},
+
+{
+name:"Prime Number",
+type:"prime"
+},
+
+{
+name:"Factor Challenge",
+type:"factor"
+},
+
+{
+name:"Divisibility Test",
+type:"divisible"
+},
+
+{
+name:"Power Challenge",
+type:"power"
+},
+
+{
+name:"Cube Challenge",
+type:"cube"
+},
+
+{
+name:"Number Comparison",
+type:"compare"
+},
+
+{
+name:"Alphabet Position",
+type:"alphabet"
+},
+
+{
+name:"Word Length",
+type:"word"
+},
+
+{
+name:"Counting Challenge",
+type:"count"
+},
+
+{
+name:"Logic Calculation",
+type:"logicmath"
+},
+
+{
+name:"Memory Number",
+type:"memory"
+},
+
+{
+name:"Fibonacci Challenge",
+type:"fibonacci"
+},
+
+{
+name:"Double Pattern",
+type:"double"
+},
+
+{
+name:"Triple Pattern",
+type:"triple"
+},
+
+{
+name:"Math Mix",
+type:"mathmix"
+},
+
+{
+name:"Fast Addition",
+type:"fastadd"
+},
+
+{
+name:"Fast Multiplication",
+type:"fastmultiply"
+},
+
+{
+name:"Number Difference",
+type:"difference"
+},
+
+{
+name:"Half Challenge",
+type:"half"
+},
+
+{
+name:"Quarter Challenge",
+type:"quarter"
+},
+
+{
+name:"Square Root",
+type:"sqrt"
+},
+
+{
+name:"Digit Sum",
+type:"digitsum"
+},
+
+{
+name:"Digit Product",
+type:"digitproduct"
+},
+
+{
+name:"Even Odd",
+type:"evenodd"
+},
+
+{
+name:"Next Number",
+type:"next"
+},
+
+{
+name:"Previous Number",
+type:"previous"
+},
+
+{
+name:"Logic Sequence",
+type:"logicsequence"
+},
+
+{
+name:"Mixed Pattern",
+type:"mixedpattern"
+},
+
+{
+name:"Number Puzzle",
+type:"numpuzzle"
+},
+
+{
+name:"Hard Addition",
+type:"hardadd"
+},
+
+{
+name:"Hard Subtraction",
+type:"hardsub"
+},
+
+{
+name:"Hard Multiplication",
+type:"hardmul"
+},
+
+{
+name:"Final Logic",
+type:"finallogic"
+},
+
+{
+name:"🏆 Final Challenge",
+type:"final"
+}
+
+];
+
+
+/* =========================
+   GAME LIST
+========================= */
+
+const gameList = document.getElementById("gameList");
+
+games.forEach((game,index)=>{
+
+  const row = document.createElement("div");
+
+  row.className="game-row";
+
+  row.innerHTML = `
+    <div class="game-name">
+      <span class="game-number">${index+1}.</span>
+      ${game.name}
+    </div>
+
+    <button onclick="startGame(${index})">
+      ▶️ Play
+    </button>
+  `;
+
+  gameList.appendChild(row);
+
+});
+
+
+/* =========================
+   GAME VARIABLES
+========================= */
+
+let currentGame = null;
 let currentAnswer = null;
-let currentReward = 20;
 
-document.getElementById("coins").textContent=coins;
-document.getElementById("completed").textContent=completed;
-document.getElementById("best").textContent=best;
 
-function save(){
- localStorage.setItem("coins",coins);
- localStorage.setItem("completed",completed);
- localStorage.setItem("best",best);
- document.getElementById("coins").textContent=coins;
- document.getElementById("completed").textContent=completed;
- document.getElementById("best").textContent=best;
+/* =========================
+   START GAME
+========================= */
+
+function startGame(index){
+
+  currentGame = index;
+
+  document.getElementById("gameList").style.display="none";
+  document.getElementById("gameScreen").style.display="block";
+
+  document.getElementById("gameTitle").textContent =
+    "🎮 Game " + (index+1) + ": " + games[index].name;
+
+  newQuestion();
 }
 
-function dailyBonus(){
- let last=localStorage.getItem("daily");
- let today=new Date().toDateString();
 
- if(last===today){
-   alert("🎁 Daily bonus already claimed today!");
-   return;
- }
+/* =========================
+   NEW QUESTION
+========================= */
 
- coins+=100;
- localStorage.setItem("daily",today);
- save();
- alert("🎉 +100 virtual coins!");
+function newQuestion(){
+
+  document.getElementById("answer").value="";
+  document.getElementById("result").textContent="";
+
+  const type = games[currentGame].type;
+
+  let q="";
+  let a="";
+
+
+  /* 1 */
+  if(type==="sequence"){
+    let x=rand(5,20);
+    q=`${x}, ${x+3}, ${x+6}, ${x+9}, ?`;
+    a=x+12;
+  }
+
+
+  /* 2 */
+  else if(type==="math"){
+    let a1=rand(10,30);
+    let b=rand(5,20);
+    q=`${a1} × ${b} + ${b} = ?`;
+    a=a1*b+b;
+  }
+
+
+  /* 3 */
+  else if(type==="pattern"){
+    let x=rand(2,10);
+    q=`${x}, ${x*2}, ${x*4}, ${x*8}, ?`;
+    a=x*16;
+  }
+
+
+  /* 4 */
+  else if(type==="logic"){
+    let x=rand(5,15);
+    q=`If ${x} apples cost ₹${x*3}, how much do ${x+2} apples cost?`;
+    a=(x+2)*3;
+  }
+
+
+  /* 5 */
+  else if(type==="missing"){
+    let x=rand(10,30);
+    q=`${x}, ${x+5}, ${x+10}, ?, ${x+20}`;
+    a=x+15;
+  }
+
+
+  /* 6 */
+  else if(type==="multiply"){
+    let x=rand(11,25);
+    let y=rand(6,15);
+    q=`${x} × ${y} = ?`;
+    a=x*y;
+  }
+
+
+  /* 7 */
+  else if(type==="division"){
+    let y=rand(4,12);
+    let x=y*rand(5,20);
+    q=`${x} ÷ ${y} = ?`;
+    a=x/y;
+  }
+
+
+  /* 8 */
+  else if(type==="square"){
+    let x=rand(8,20);
+    q=`${x}² = ?`;
+    a=x*x;
+  }
+
+
+  /* 9 */
+  else if(type==="odd"){
+    let x=rand(10,30);
+    q=`Which is odd: ${x}, ${x+2}, ${x+4}, ${x+5}?`;
+    a=x%2===1 ? x : x+5;
+  }
+
+
+  /* 10 */
+  else if(type==="letter"){
+    let n=rand(1,26);
+    q=`What is the ${n}th alphabet letter? Enter A-Z.`;
+    a=String.fromCharCode(64+n);
+  }
+
+
+  /* 11 */
+  else if(type==="reverse"){
+    let x=rand(100,999);
+    q=`Reverse this number: ${x}`;
+    a=String(x).split("").reverse().join("");
+  }
+
+
+  /* 12 */
+  else if(type==="addition"){
+    let x=rand(100,500);
+    let y=rand(100,500);
+    q=`${x} + ${y} = ?`;
+    a=x+y;
+  }
+
+
+  /* 13 */
+  else if(type==="subtraction"){
+    let x=rand(300,900);
+    let y=rand(100,299);
+    q=`${x} - ${y} = ?`;
+    a=x-y;
+  }
+
+
+  /* 14 */
+  else if(type==="percentage"){
+    let x=rand(10,50)*10;
+    q=`What is 20% of ${x}?`;
+    a=x/5;
+  }
+
+
+  /* 15 */
+  else if(type==="average"){
+    let a1=rand(10,40);
+    let b=rand(10,40);
+    let c=rand(10,40);
+    q=`Average of ${a1}, ${b}, ${c} = ?`;
+    a=(a1+b+c)/3;
+  }
+
+
+  /* 16 */
+  else if(type==="ratio"){
+    let x=rand(2,10);
+    q=`If 2 : ${x} = 10 : ?`;
+    a=x*5;
+  }
+
+
+  /* 17 */
+  else if(type==="prime"){
+    let primes=[11,13,17,19,23,29,31,37,41,43];
+    a=primes[rand(0,primes.length-1)];
+    q=`Enter any prime number between 10 and 45.`;
+  }
+
+
+  /* 18 */
+  else if(type==="factor"){
+    let x=rand(6,15);
+    q=`How many positive factors does ${x*x} have?`;
+    a=countFactors(x*x);
+  }
+
+
+  /* 19 */
+  else if(type==="divisible"){
+    let x=rand(10,30);
+    q=`Is ${x*9} divisible by ${x}? Enter YES or NO.`;
+    a="YES";
+  }
+
+
+  /* 20 */
+  else if(type==="power"){
+    let x=rand(2,5);
+    q=`${x}³ = ?`;
+    a=x*x*x;
+  }
+
+
+  /* 21 */
+  else if(type==="cube"){
+    let x=rand(4,10);
+    q=`Cube of ${x} = ?`;
+    a=x*x*x;
+  }
+
+
+  /* 22 */
+  else if(type==="compare"){
+    let x=rand(100,500);
+    let y=rand(100,500);
+    q=`Which is larger: ${x} or ${y}?`;
+    a=Math.max(x,y);
+  }
+
+
+  /* 23 */
+  else if(type==="alphabet"){
+    let letter=String.fromCharCode(65+rand(0,25));
+    q=`What is the alphabet position of ${letter}?`;
+    a=letter.charCodeAt(0)-64;
+  }
+
+
+  /* 24 */
+  else if(type==="word"){
+    let words=["PATNA","CLUB","PUZZLE","GAMING","CHALLENGE"];
+    let word=words[rand(0,words.length-1)];
+    q=`How many letters are in "${word}"?`;
+    a=word.length;
+  }
+
+
+  /* 25 */
+  else if(type==="count"){
+    let x=rand(10,30);
+    q=`How many numbers from 1 to ${x} are even?`;
+    a=Math.floor(x/2);
+  }
+
+
+  /* 26 */
+  else if(type==="logicmath"){
+    let x=rand(5,15);
+    q=`If x=${x}, calculate x² + 2x.`;
+    a=x*x+2*x;
+  }
+
+
+  /* 27 */
+  else if(type==="memory"){
+    let x=rand(1000,9999);
+    q=`Remember ${x}. Now enter the number shown.`;
+    a=x;
+  }
+
+
+  /* 28 */
+  else if(type==="fibonacci"){
+    let x=rand(2,8);
+    let arr=[0,1];
+    for(let i=2;i<=x+2;i++){
+      arr.push(arr[i-1]+arr[i-2]);
+    }
+    q=`Next Fibonacci number: ${arr[x]}, ${arr[x+1]}, ?`;
+    a=arr[x+2];
+  }
+
+
+  /* 29 */
+  else if(type==="double"){
+    let x=rand(3,10);
+    q=`${x}, ${x*2}, ${x*4}, ${x*8}, ?`;
+    a=x*16;
+  }
+
+
+  /* 30 */
+  else if(type==="triple"){
+    let x=rand(2,7);
+    q=`${x}, ${x*3}, ${x*9}, ${x*27}, ?`;
+    a=x*81;
+  }
+
+
+  /* 31 */
+  else if(type==="mathmix"){
+    let x=rand(10,30);
+    q=`(${x} × 3) + 7 = ?`;
+    a=x*3+7;
+  }
+
+
+  /* 32 */
+  else if(type==="fastadd"){
+    let x=rand(500,999);
+    let y=rand(500,999);
+    q=`${x} + ${y} = ?`;
+    a=x+y;
+  }
+
+
+  /* 33 */
+  else if(type==="fastmultiply"){
+    let x=rand(20,40);
+    q=`${x} × 25 = ?`;
+    a=x*25;
+  }
+
+
+  /* 34 */
+  else if(type==="difference"){
+    let x=rand(100,500);
+    let y=rand(50,99);
+    q=`Difference between ${x} and ${y} = ?`;
+    a=x-y;
+  }
+
+
+  /* 35 */
+  else if(type==="half"){
+    let x=rand(10,50)*2;
+    q=`Half of ${x} = ?`;
+    a=x/2;
+  }
+
+
+  /* 36 */
+  else if(type==="quarter"){
+    let x=rand(10,50)*4;
+    q=`Quarter of ${x} = ?`;
+    a=x/4;
+  }
+
+
+  /* 37 */
+  else if(type==="sqrt"){
+    let x=rand(4,15);
+    q=`√${x*x} = ?`;
+    a=x;
+  }
+
+
+  /* 38 */
+  else if(type==="digitsum"){
+    let x=rand(100,999);
+    q=`Digit sum of ${x} = ?`;
+    a=String(x).split("").reduce((s,n)=>s+Number(n),0);
+  }
+
+
+  /* 39 */
+  else if(type==="digitproduct"){
+    let x=rand(100,999);
+    q=`Product of digits of ${x} = ?`;
+    a=String(x).split("").reduce((p,n)=>p*Number(n),1);
+  }
+
+
+  /* 40 */
+  else if(type==="evenodd"){
+    let x=rand(100,999);
+    q=`Is ${x} EVEN or ODD?`;
+    a=x%2===0?"EVEN":"ODD";
+  }
+
+
+  /* 41 */
+  else if(type==="next"){
+    let x=rand(100,999);
+    q=`What comes after ${x}?`;
+    a=x+1;
+  }
+
+
+  /* 42 */
+  else if(type==="previous"){
+    let x=rand(100,999);
+    q=`What comes before ${x}?`;
+    a=x-1;
+  }
+
+
+  /* 43 */
+  else if(type==="logicsequence"){
+    let x=rand(3,10);
+    q=`${x}, ${x+2}, ${x+6}, ${x+12}, ?`;
+    a=x+20;
+  }
+
+
+  /* 44 */
+  else if(type==="mixedpattern"){
+    let x=rand(2,8);
+    q=`${x}, ${x+2}, ${(x+2)*2}, ${(x+2)*2+2}, ?`;
+    a=((x+2)*2+2)*2;
+  }
+
+
+  /* 45 */
+  else if(type==="numpuzzle"){
+    let x=rand(10,30);
+    q=`I am a number. Add 5 then multiply by 2 and get ${(x+5)*2}. What am I?`;
+    a=x;
+  }
+
+
+  /* 46 */
+  else if(type==="hardadd"){
+    let x=rand(1000,5000);
+    let y=rand(1000,5000);
+    let z=rand(1000,5000);
+    q=`${x} + ${y} + ${z} = ?`;
+    a=x+y+z;
+  }
+
+
+  /* 47 */
+  else if(type==="hardsub"){
+    let x=rand(3000,9000);
+    let y=rand(1000,2999);
+    q=`${x} - ${y} = ?`;
+    a=x-y;
+  }
+
+
+  /* 48 */
+  else if(type==="hardmul"){
+    let x=rand(20,50);
+    let y=rand(10,30);
+    q=`${x} × ${y} = ?`;
+    a=x*y;
+  }
+
+
+  /* 49 */
+  else if(type==="finallogic"){
+    let x=rand(5,15);
+    q=`A number is doubled and then 10 is added. Result = ${x*2+10}. What is the number?`;
+    a=x;
+  }
+
+
+  /* 50 */
+  else if(type==="final"){
+    let x=rand(10,30);
+    q=`🏆 FINAL: ${x} × 4 + ${x} × 2 = ?`;
+    a=x*6;
+  }
+
+
+  currentAnswer=a;
+  document.getElementById("question").innerHTML=q;
 }
 
-function demoAd(){
- alert("📺 Ad Demo\n\nAd simulation complete!");
- coins+=50;
- save();
- alert("🪙 +50 virtual coins!");
+
+/* =========================
+   CHECK ANSWER
+========================= */
+
+function checkAnswer(){
+
+  let user=document.getElementById("answer").value.trim();
+
+  if(user===""){
+    document.getElementById("result").textContent=
+      "⚠️ Answer enter karo.";
+    return;
+  }
+
+  let correct=String(user).toUpperCase() ===
+              String(currentAnswer).toUpperCase();
+
+  if(correct){
+
+    let reward=20;
+
+    if(currentGame===49){
+      reward=100;
+    }
+
+    coins += reward;
+
+    localStorage.setItem("patnaCoins",coins);
+
+    document.getElementById("coins").textContent=coins;
+
+    document.getElementById("result").textContent=
+      `🎉 Correct! +${reward} virtual coins 🪙`;
+
+  }else{
+
+    document.getElementById("result").textContent=
+      "❌ Wrong answer. Try again!";
+  }
 }
 
-function startGame(){
- gameIndex=0;
- document.getElementById("home").style.display="none";
- document.getElementById("game").style.display="block";
- nextGame();
+
+/* =========================
+   BACK
+========================= */
+
+function showList(){
+
+  document.getElementById("gameScreen").style.display="none";
+  document.getElementById("gameList").style.display="flex";
+
 }
 
-function backHome(){
- document.getElementById("game").style.display="none";
- document.getElementById("home").style.display="block";
+
+/* =========================
+   RANDOM
+========================= */
+
+function rand(min,max){
+  return Math.floor(Math.random()*(max-min+1))+min;
 }
 
-function nextGame(){
- if(gameIndex>=50){
-   alert("🏆 Congratulations! You completed all 50 games!");
-   backHome();
-   return;
- }
 
- document.getElementById("gameNo").textContent=gameIndex+1;
- currentReward=20+(gameIndex%5)*10;
- document.getElementById("reward").textContent=currentReward;
+/* =========================
+   FACTORS
+========================= */
 
- let type=gameIndex%10;
+function countFactors(n){
 
- if(type===0) mathGame();
- if(type===1) sequenceGame();
- if(type===2) oddGame();
- if(type===3) memoryGame();
- if(type===4) compareGame();
- if(type===5) percentageGame();
- if(type===6) logicGame();
- if(type===7) multiplicationGame();
- if(type===8) alphabetGame();
- if(type===9) numberPuzzleGame();
+  let count=0;
 
- document.getElementById("gameTitle").textContent=
-   "🎯 Game "+(gameIndex+1);
+  for(let i=1;i<=n;i++){
+
+    if(n%i===0){
+      count++;
+    }
+
+  }
+
+  return count;
 }
 
-function finish(correct){
- if(correct){
-   coins+=currentReward;
-   completed++;
-   if(coins>best) best=coins;
-   save();
-   alert("✅ Correct! +"+currentReward+" virtual coins");
- }else{
-   alert("❌ Wrong answer. Try the next challenge!");
- }
- gameIndex++;
- nextGame();
-}
-
-function mathGame(){
- let a=20+gameIndex*3;
- let b=7+gameIndex;
- currentAnswer=a*b-a;
- document.getElementById("question").innerHTML=
- `🧮 Calculate:<br><b>(${a} × ${b}) − ${a}</b>`;
- inputAnswer();
-}
-
-function sequenceGame(){
- let a=gameIndex+2;
- currentAnswer=(a+3)*2;
- document.getElementById("question").innerHTML=
- `🔢 Find the next number:<br>
- <b>${a}, ${a+3}, ${(a+3)*2-1}, ${a*3+3}, ?</b>`;
- inputAnswer();
-}
-
-function oddGame(){
- let nums=[12,18,24,31,36];
- currentAnswer=31;
- document.getElementById("question").innerHTML=
- `🧠 Which number is different?<br><b>${nums.join(" • ")}</b>`;
- options([12,24,31,36]);
-}
-
-function memoryGame(){
- let n=Math.floor(Math.random()*8)+2;
- currentAnswer=n;
- document.getElementById("question").innerHTML=
- `🧠 Memory Challenge:<br>
- Remember this number: <b>${n}${n+2}${n+4}</b>
- <br><span class="small">Answer with the middle digit.</span>`;
- currentAnswer=(n+2)%10;
- inputAnswer();
-}
-
-function compareGame(){
- let a=gameIndex*17+53;
- let b=gameIndex*13+77;
- currentAnswer=Math.max(a,b);
- document.getElementById("question").innerHTML=
- `⚖️ Which is larger?<br><b>${a}</b> or <b>${b}</b>`;
- options([a,b]);
-}
-
-function percentageGame(){
- let base=200+gameIndex*10;
- currentAnswer=base*25/100;
- document.getElementById("question").innerHTML=
- `📊 What is 25% of <b>${base}</b>?`;
- inputAnswer();
-}
-
-function logicGame(){
- let a=gameIndex+5;
- currentAnswer=a*2+1;
- document.getElementById("question").innerHTML=
- `💡 Logic:<br>
- If 1 → 3, 2 → 5, 3 → 7,<br>
- then <b>${a}</b> → ?`;
- inputAnswer();
-}
-
-function multiplicationGame(){
- let a=gameIndex+11;
- let b=gameIndex%9+6;
- currentAnswer=a*b;
- document.getElementById("question").innerHTML=
- `✖️ Solve:<br><b>${a} × ${b} = ?</b>`;
- inputAnswer();
-}
-
-function alphabetGame(){
- let letters="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
- let pos=(gameIndex*3)%23;
- currentAnswer=letters[pos+3];
- document.getElementById("question").innerHTML=
- `🔤 Which letter comes 3 places after
- <b>${letters[pos]}</b>?`;
- inputText();
-}
-
-function numberPuzzleGame(){
- let a=gameIndex+4;
- currentAnswer=a*a;
- document.getElementById("question").innerHTML=
- `🧩 Find the square:<br><b>${a}² = ?</b>`;
- inputAnswer();
-}
-
-function inputAnswer(){
- document.getElementById("answerArea").innerHTML=`
- <input id="ans" type="number" placeholder="Your answer">
- <br>
- <button onclick="checkNumber()">✅ Submit</button>`;
-}
-
-function inputText(){
- document.getElementById("answerArea").innerHTML=`
- <input id="ans" type="text" maxlength="1" placeholder="Letter">
- <br>
- <button onclick="checkText()">✅ Submit</button>`;
-}
-
-function checkNumber(){
- let v=Number(document.getElementById("ans").value);
- finish(v===Number(currentAnswer));
-}
-
-function checkText(){
- let v=document.getElementById("ans").value.toUpperCase();
- finish(v===currentAnswer);
-}
-
-function options(arr){
- arr=[...arr].sort(()=>Math.random()-.5);
- document.getElementById("answerArea").innerHTML=
- `<div class="options">`+
- arr.map(x=>`<button onclick="finish(${JSON.stringify(x)}===currentAnswer)">
- ${x}</button>`).join("")+
- `</div>`;
-}
 </script>
 
 </body>
-  </html>
+</html>
