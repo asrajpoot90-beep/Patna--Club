@@ -1,1 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>👑 PATNA CLUB 👑</title>
 
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:#111;
+  color:#fff;
+  font-family:Arial,sans-serif;
+  text-align:center;
+}
+header{
+  background:#171717;
+  padding:22px 10px;
+}
+h1{color:#ffd400;margin:0 0 8px}
+.top{
+  background:#222;
+  padding:18px 10px;
+  border-bottom:2px solid #333;
+}
+.coins{
+  font-size:22px;
+  font-weight:bold;
+  color:#ffd400;
+}
+button{
+  background:#ffd400;
+  color:#111;
+  border:0;
+  padding:12px 20px;
+  border-radius:8px;
+  font-weight:bold;
+  margin:7px;
+  cursor:pointer;
+}
+button:hover{opacity:.85}
+.card{
+  background:#222;
+  margin:15px auto;
+  padding:20px;
+  max-width:600px;
+  border-radius:12px;
+}
+.game{
+  display:none;
+}
+input{
+  padding:12px;
+  border-radius:7px;
+  border:1px solid #777;
+  width:80%;
+  max-width:300px;
+  text-align:center;
+  font-size:17px;
+}
+#question{
+  font-size:22px;
+  margin:20px;
+  line-height:1.5;
+}
+.options button{
+  min-width:110px;
+}
+.small{color:#aaa}
+.success{color:#57e389}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>👑 PATNA CLUB 👑</h1>
+<p>🎮 Play • 🧠 Think • 🏆 Win</p>
+</header>
+
+<div class="top">
+  <div class="coins">🪙 Virtual Coins: <span id="coins">1000</span></div>
+  <button onclick="dailyBonus()">🎁 Daily Bonus</button>
+  <button onclick="demoAd()">📺 Watch Ad (Demo)</button>
+</div>
+
+<div class="card" id="home">
+<h2>🎮 50 Hard Skill Games</h2>
+<p>Har game me virtual coins milenge.</p>
+<button onclick="startGame()">▶️ Start Game</button>
+<p class="small">No real money • No betting • Virtual coins only</p>
+</div>
+
+<div class="card game" id="game">
+<h2 id="gameTitle"></h2>
+<div id="question"></div>
+<div id="answerArea"></div>
+<p>Game <span id="gameNo">1</span> / 50</p>
+<p>Reward: 🪙 <span id="reward">20</span></p>
+<button onclick="backHome()">🏠 Home</button>
+</div>
+
+<div class="card">
+<h2>🏆 Your Progress</h2>
+<p>Games Completed: <b id="completed">0</b> / 50</p>
+<p>Best Score: 🪙 <b id="best">0</b></p>
+</div>
+
+<script>
+let coins = Number(localStorage.getItem("coins")) || 1000;
+let completed = Number(localStorage.getItem("completed")) || 0;
+let best = Number(localStorage.getItem("best")) || 0;
+let gameIndex = 0;
+let currentAnswer = null;
+let currentReward = 20;
+
+document.getElementById("coins").textContent=coins;
+document.getElementById("completed").textContent=completed;
+document.getElementById("best").textContent=best;
+
+function save(){
+ localStorage.setItem("coins",coins);
+ localStorage.setItem("completed",completed);
+ localStorage.setItem("best",best);
+ document.getElementById("coins").textContent=coins;
+ document.getElementById("completed").textContent=completed;
+ document.getElementById("best").textContent=best;
+}
+
+function dailyBonus(){
+ let last=localStorage.getItem("daily");
+ let today=new Date().toDateString();
+
+ if(last===today){
+   alert("🎁 Daily bonus already claimed today!");
+   return;
+ }
+
+ coins+=100;
+ localStorage.setItem("daily",today);
+ save();
+ alert("🎉 +100 virtual coins!");
+}
+
+function demoAd(){
+ alert("📺 Ad Demo\n\nAd simulation complete!");
+ coins+=50;
+ save();
+ alert("🪙 +50 virtual coins!");
+}
+
+function startGame(){
+ gameIndex=0;
+ document.getElementById("home").style.display="none";
+ document.getElementById("game").style.display="block";
+ nextGame();
+}
+
+function backHome(){
+ document.getElementById("game").style.display="none";
+ document.getElementById("home").style.display="block";
+}
+
+function nextGame(){
+ if(gameIndex>=50){
+   alert("🏆 Congratulations! You completed all 50 games!");
+   backHome();
+   return;
+ }
+
+ document.getElementById("gameNo").textContent=gameIndex+1;
+ currentReward=20+(gameIndex%5)*10;
+ document.getElementById("reward").textContent=currentReward;
+
+ let type=gameIndex%10;
+
+ if(type===0) mathGame();
+ if(type===1) sequenceGame();
+ if(type===2) oddGame();
+ if(type===3) memoryGame();
+ if(type===4) compareGame();
+ if(type===5) percentageGame();
+ if(type===6) logicGame();
+ if(type===7) multiplicationGame();
+ if(type===8) alphabetGame();
+ if(type===9) numberPuzzleGame();
+
+ document.getElementById("gameTitle").textContent=
+   "🎯 Game "+(gameIndex+1);
+}
+
+function finish(correct){
+ if(correct){
+   coins+=currentReward;
+   completed++;
+   if(coins>best) best=coins;
+   save();
+   alert("✅ Correct! +"+currentReward+" virtual coins");
+ }else{
+   alert("❌ Wrong answer. Try the next challenge!");
+ }
+ gameIndex++;
+ nextGame();
+}
+
+function mathGame(){
+ let a=20+gameIndex*3;
+ let b=7+gameIndex;
+ currentAnswer=a*b-a;
+ document.getElementById("question").innerHTML=
+ `🧮 Calculate:<br><b>(${a} × ${b}) − ${a}</b>`;
+ inputAnswer();
+}
+
+function sequenceGame(){
+ let a=gameIndex+2;
+ currentAnswer=(a+3)*2;
+ document.getElementById("question").innerHTML=
+ `🔢 Find the next number:<br>
+ <b>${a}, ${a+3}, ${(a+3)*2-1}, ${a*3+3}, ?</b>`;
+ inputAnswer();
+}
+
+function oddGame(){
+ let nums=[12,18,24,31,36];
+ currentAnswer=31;
+ document.getElementById("question").innerHTML=
+ `🧠 Which number is different?<br><b>${nums.join(" • ")}</b>`;
+ options([12,24,31,36]);
+}
+
+function memoryGame(){
+ let n=Math.floor(Math.random()*8)+2;
+ currentAnswer=n;
+ document.getElementById("question").innerHTML=
+ `🧠 Memory Challenge:<br>
+ Remember this number: <b>${n}${n+2}${n+4}</b>
+ <br><span class="small">Answer with the middle digit.</span>`;
+ currentAnswer=(n+2)%10;
+ inputAnswer();
+}
+
+function compareGame(){
+ let a=gameIndex*17+53;
+ let b=gameIndex*13+77;
+ currentAnswer=Math.max(a,b);
+ document.getElementById("question").innerHTML=
+ `⚖️ Which is larger?<br><b>${a}</b> or <b>${b}</b>`;
+ options([a,b]);
+}
+
+function percentageGame(){
+ let base=200+gameIndex*10;
+ currentAnswer=base*25/100;
+ document.getElementById("question").innerHTML=
+ `📊 What is 25% of <b>${base}</b>?`;
+ inputAnswer();
+}
+
+function logicGame(){
+ let a=gameIndex+5;
+ currentAnswer=a*2+1;
+ document.getElementById("question").innerHTML=
+ `💡 Logic:<br>
+ If 1 → 3, 2 → 5, 3 → 7,<br>
+ then <b>${a}</b> → ?`;
+ inputAnswer();
+}
+
+function multiplicationGame(){
+ let a=gameIndex+11;
+ let b=gameIndex%9+6;
+ currentAnswer=a*b;
+ document.getElementById("question").innerHTML=
+ `✖️ Solve:<br><b>${a} × ${b} = ?</b>`;
+ inputAnswer();
+}
+
+function alphabetGame(){
+ let letters="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+ let pos=(gameIndex*3)%23;
+ currentAnswer=letters[pos+3];
+ document.getElementById("question").innerHTML=
+ `🔤 Which letter comes 3 places after
+ <b>${letters[pos]}</b>?`;
+ inputText();
+}
+
+function numberPuzzleGame(){
+ let a=gameIndex+4;
+ currentAnswer=a*a;
+ document.getElementById("question").innerHTML=
+ `🧩 Find the square:<br><b>${a}² = ?</b>`;
+ inputAnswer();
+}
+
+function inputAnswer(){
+ document.getElementById("answerArea").innerHTML=`
+ <input id="ans" type="number" placeholder="Your answer">
+ <br>
+ <button onclick="checkNumber()">✅ Submit</button>`;
+}
+
+function inputText(){
+ document.getElementById("answerArea").innerHTML=`
+ <input id="ans" type="text" maxlength="1" placeholder="Letter">
+ <br>
+ <button onclick="checkText()">✅ Submit</button>`;
+}
+
+function checkNumber(){
+ let v=Number(document.getElementById("ans").value);
+ finish(v===Number(currentAnswer));
+}
+
+function checkText(){
+ let v=document.getElementById("ans").value.toUpperCase();
+ finish(v===currentAnswer);
+}
+
+function options(arr){
+ arr=[...arr].sort(()=>Math.random()-.5);
+ document.getElementById("answerArea").innerHTML=
+ `<div class="options">`+
+ arr.map(x=>`<button onclick="finish(${JSON.stringify(x)}===currentAnswer)">
+ ${x}</button>`).join("")+
+ `</div>`;
+}
+</script>
+
+</body>
+  </html>
